@@ -8,6 +8,7 @@
 
 import UIKit
 import CoreData
+import UserNotifications
 
 class ShoppingListTableViewController: UITableViewController {
     
@@ -98,6 +99,36 @@ class ShoppingListTableViewController: UITableViewController {
             print("Error deleting ShoppingListItems from Core Data!")
         }
         loadShoppingListItems()
+    }
+    
+    func shoppingListDoneNotification () {
+        
+        var done = true
+        
+        // loop through shopping list items
+        for item in shoppingListItems{
+            // check if any of the purchased attributes are false
+            if item.purchased == false {
+                // set done to false
+                done = false
+            }
+        }
+        
+        // check if done is true
+        if (done == true) {
+            
+            // create content object that controls the content and sound of the notification
+            let content = UNMutableNotificationContent()
+            content.body = "Shopping List Complete"
+            content.sound = UNNotificationSound.default
+            
+            // create request object that defines when the notification will be sent and if it should be sent repeatidly
+            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+            
+            let request = UNNotificationRequest(identifier: "shopperIdentifier", content: content, trigger: trigger)
+            
+            UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
+        }
     }
     
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
@@ -269,6 +300,8 @@ class ShoppingListTableViewController: UITableViewController {
         
         //call deselect Row method to allow update to be visinle in table view controller
         tableView.deselectRow(at: indexPath, animated: true)
+        
+        shoppingListDoneNotification()
     }
 
     // Override to support editing the table view.
